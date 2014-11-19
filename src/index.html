@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Media Player</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript"  src="js/teq/Teq.js"></script>
+        <script type="text/javascript"  src="js/teq/TeqArray.js"></script>
+        <script type="text/javascript"  src="js/teq/TeqNumber.js"></script>
+        <script type="text/javascript"  src="js/teq/TeqObject.js"></script>
+        <script type="text/javascript"  src="js/teq/TeqString.js"></script>
+        <script type="text/javascript"  src="js/teq/TeqDom.js"></script>
+        <script type="text/javascript"  src="js/MediaPlayer.js"></script>
+        <script type="text/javascript"  src="js/FlashMediaProvider.js"></script>
+        <script type="text/javascript"  src="js/HTML5MediaProvider.js"></script>
+    </head>
+    <body>
+        <script>
+            var player;
+            t.dom.onReady(function () {
+                player = new window.MP({
+                    source : [
+                        {
+                            src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',
+                            type : 'audio/mpeg'
+                        }
+                    ],
+                    autoplay : true
+                });
+                //player.appendTo('body');
+            });
+        </script>
+    </body>
+</html>
