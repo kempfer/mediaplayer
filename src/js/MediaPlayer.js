@@ -9,17 +9,21 @@
 	],
     
     createProvider = function createProvider (options) {
-        var provider;
-        if( options['use'] === MediaPlayer.constants.HTML5){
-            provider = new window.MP.HTML5Provider({
-                type : options['type'],
-                source : options['source'],
-                autoplay :  options['autoplay'],
-                loop : options['loop'],
-                preload : options['preload'],
-                autobuffer : options['autobuffer'],
-                volume : options['volume']
-            });
+        var provider, providerOptions;
+        providerOptions = {
+                    type : options['type'],
+                    source : options['source'],
+                    autoplay :  options['autoplay'],
+                    loop : options['loop'],
+                    preload : options['preload'],
+                    autobuffer : options['autobuffer'],
+                    volume : options['volume']
+        };
+        if( options['use'] === MediaPlayer.constants.FLASH){
+            provider = new window.MP.FlashProvider(providerOptions);
+        }
+        else{
+            provider = new window.MP.HTML5Provider(providerOptions);
         }
         provider.on(eventList.join(' '), function (e) {
             console.log(e.type);

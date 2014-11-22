@@ -12,7 +12,7 @@ package
 	import flash.display.Sprite;	
 	import flash.media.SoundLoaderContext;
 	import flash.events.IOErrorEvent;
-	
+	import flash.external.ExternalInterface;
 	/**
 	 * ...
 	 * @author zotov_mv@groupbwt.com
@@ -54,6 +54,8 @@ package
 		
 		private var _lastVolume:Number;
 		
+		private var _ended:Boolean;
+		
 
 		
 		/**
@@ -66,8 +68,7 @@ package
 			this.arrayFrequencyData = new Array();
 			this.trans = new SoundTransform(1, 0);
 			this.isPlaying = false;
-			trace('init');
-			this.load('https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6');
+			this._ended = false;
 		}
 		
 		/**
@@ -114,7 +115,7 @@ package
 		 * 
 		 */		
 		public function get currentTime ():Number {
-			return this._currentTime;
+			return soundChannel.position;
 		}
 		/**
 		 * 
@@ -184,7 +185,7 @@ package
 		 */
 		public function set autoplay (autoplay:Boolean):void {
 			//TODO  реалтзовать функционал
-			this.autoplay = autoplay
+			this._autoplay = autoplay;
 		}
 		/**
 		 * 
@@ -199,6 +200,27 @@ package
 		public function set autobuffer (autobuffer:Boolean):void {
 			//TODO  реалтзовать функционал
 			this._autobuffer = autobuffer;
+		}
+		/**
+		 * 
+		 */
+		public function get ended ():Boolean {
+			//TODO  реалтзовать функционал
+			return this._ended;
+		}
+		/**
+		 * 
+		 */
+		public function get frequencyData () :Array {
+			SoundMixer.computeSpectrum(this.byteFrequencyData , false, 0);		
+			this.arrayFrequencyData = [];
+			var _local1:int;
+			var _local2:int = this.byteFrequencyData.length/4;
+			while (_local1 < _local2) {
+				this.arrayFrequencyData.push(int(this.byteFrequencyData.readFloat() * 1000));
+				_local1++;
+			}
+			return this.arrayFrequencyData;
 		}
 		
 		/**
@@ -218,7 +240,7 @@ package
 			this.sound.addEventListener(ProgressEvent.PROGRESS, this.onProgressLoad);	
 			this.sound.addEventListener(IOErrorEvent.IO_ERROR, this.errorHandler);
 			this.sound.load(req);
-			this.play(0);
+		//	this.play(0);
 			return this;
 		}
 		/**
@@ -226,17 +248,24 @@ package
 		 * @param	time
 		 */
 		public function play (time:Number = 0):AudioProvider {
-			if (this.isPlaying == true) {
-				return this;
+			try {
+				if (this.isPlaying == true) {
+					return this;
+				}
+				this.pause();
+				this.soundChannel = this.sound.play(time,0,this.trans);	
+				this.trans.volume = this._volume;			
+				this.soundChannel.soundTransform = this.trans;			
+				//this.addEventListener(Event.ENTER_FRAME, this.onEnterFrame);
+				this.soundChannel.addEventListener(Event.SOUND_COMPLETE, this.onPlaybackComplete);	
+				this.isPlaying = true;
+				trace('play');
 			}
-			this.soundChannel = this.sound.play(time,0,this.trans);	
-			this.trans.volume = this._volume;			
-			this.soundChannel.soundTransform = this.trans;			
-			this.addEventListener(Event.ENTER_FRAME, this.onEnterFrame);
-			this.soundChannel.addEventListener(Event.SOUND_COMPLETE, this.onPlaybackComplete);	
-			this.isPlaying = true;
-			trace('play');
+			catch (error:Error) {
+				trace(error.message);
+			}
 			return this;
+			
 		}
 		/**
 		 * 
@@ -340,6 +369,8 @@ package
 		private function onPlaybackComplete (event:Event):void {
 			//TODO  реалтзовать функционал
 			this.removeEventListener(Event.ENTER_FRAME, this.onEnterFrame);
+			this.isPlaying = false;
+			this._ended = true;
 			trace("PlaybackComplete");
 		}
 		/**
@@ -355,7 +386,8 @@ package
 		 * @param	event
 		 */
 		private function onEnterFrame (event:Event):void {
-			SoundMixer.computeSpectrum(this.byteFrequencyData , false, 0);			
+			SoundMixer.computeSpectrum(this.byteFrequencyData , false, 0);		
+			this._currentTime = soundChannel.position;
 			this.arrayFrequencyData = [];
 			var _local1:int;
 			var _local2:int = this.byteFrequencyData.length/4;
@@ -363,9 +395,8 @@ package
 				this.arrayFrequencyData.push(int(this.byteFrequencyData.readFloat() * 1000));
 				_local1++;
 			}
-			this._currentTime = soundChannel.position;
-			//trace(this.arrayFrequencyData[0])
-			//trace(this.progress);
+			this.getCurrentTime();
+			//trace(this.currentTime);
 		}
 		
 		
@@ -385,6 +416,12 @@ package
 		 */
 		private function onSampleData (event:SampleDataEvent):void {
 			trace('onSampleData');
+		}
+		
+		public function getCurrentTime ():Number {
+			//ExternalInterface.call('console.log', c);
+			trace(this._currentTime);
+			return soundChannel.position;
 		}
 
 	}

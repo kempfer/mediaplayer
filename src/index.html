@@ -9,6 +9,7 @@ and open the template in the editor.
         <title>Media Player</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript"  src="js/swfobject.js"></script>
         <script type="text/javascript"  src="js/teq/Teq.js"></script>
         <script type="text/javascript"  src="js/teq/TeqArray.js"></script>
         <script type="text/javascript"  src="js/teq/TeqNumber.js"></script>
@@ -20,17 +21,19 @@ and open the template in the editor.
         <script type="text/javascript"  src="js/HTML5MediaProvider.js"></script>
     </head>
     <body>
+        <div id="altContent"></div>
         <script>
             var player;
             t.dom.onReady(function () {
                 player = new window.MP({
                     source : [
                         {
-                            src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',
+                            src : 'qww1.mp3',
                             type : 'audio/mpeg'
                         }
                     ],
-                    autoplay : true
+                    autoplay : true,
+                    use : MP.constants.FLASH
                 });
                 //player.appendTo('body');
             });
