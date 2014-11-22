@@ -30,7 +30,8 @@
                 }
             },60);
         }
-    };
+    },
+    events = {};
     
     
     var FlashMediaProvider = function (options) {
@@ -115,7 +116,7 @@
 		*@return {FlashMediaProvider}
 		*/
 		setMuted : function (muted) {
-			return this.element.muted(muted);
+			this.element.setMuted(muted);
 			return this;
 		},
 		/**
@@ -133,7 +134,7 @@
 		*@return {FlashMediaProvider}
 		*/
 		setVolume : function  (value) {
-			this.element.volume(value / 100);
+			this.element.setVolume(value / 100);
 			return this;
 		},
         /**
@@ -164,11 +165,16 @@
             return this;
         },
         on : function (event, func) {
-            
+            events[event] = func;
+            this.element.on(event, '');
         }
         
     };
-    
+    FlashMediaProvider.eventHandler = function (type) {
+        if(events[type]) {
+            events[type]();
+        }
+    };
     FlashMediaProvider.defaultOptions = {
         loop : false,
         autoplay : false,

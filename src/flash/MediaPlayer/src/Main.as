@@ -11,6 +11,7 @@ package
 	public class Main extends Sprite 
 	{
 		private var provider:AudioProvider;
+		private var events:Object;
 		
 		public function Main():void 
 		{
@@ -23,6 +24,10 @@ package
 		{
 			this.provider = new AudioProvider();
 			this.provider .addEventListener(AudioProvider.EventList.ON_PROGRESS, this.eventHandler);
+			this.provider.addEventListener(AudioProvider.EventList.ON_LOADSTARR, this.eventHandler);
+			this.provider.addEventListener(AudioProvider.EventList.ON_PLAY, this.eventHandler);
+			this.provider.addEventListener(AudioProvider.EventList.ON_PAUSE, this.eventHandler);
+			this.provider.addEventListener(AudioProvider.EventList.ON_ERROR, this.eventHandler);
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			if (ExternalInterface.available) {
 				try {
@@ -43,11 +48,8 @@ package
 					ExternalInterface.addCallback('progress', this.progress);
 					ExternalInterface.addCallback('autobuffer', this.autobuffer);
 					ExternalInterface.addCallback('autoplay', this.autoplay);
-					//
 					ExternalInterface.addCallback('memoryUse', this.getMemoryUse);
 					ExternalInterface.addCallback('on', this.on);
-					//
-					
 				}
 				catch (error:SecurityError) {
 					trace(error.message);
@@ -62,6 +64,9 @@ package
 		 * @param	event
 		 */
 		private function eventHandler (event:Event):void {
+			if (this.events[event.type]) {
+				ExternalInterface.call("window.MP.FlashProvider.eventHandler",event.type);
+			}
 			trace("main fire event");
 		}
 		/**
@@ -190,9 +195,11 @@ package
 		}
 		/**
 		 * 
+		 * @param	event
+		 * @param	func
 		 */
-		private function on (event:String):void {
-			
+		private function on (event:String,func:String):void {
+			this.events[event] = func;
 		}
 	}
 	

@@ -21,7 +21,11 @@ package
 	public class AudioProvider extends Sprite
 	{
 		public static const EventList:Object = {
-			ON_PROGRESS : 'progress'
+			ON_PROGRESS : 'progress',
+			ON_LOADSTARR: 'loadstart',
+			ON_PLAY : 'play',
+			ON_PAUSE : 'pause',
+			ON_ERROR : 'error'
 		};
 		
 		private var sound:Sound;
@@ -122,7 +126,10 @@ package
 		 * @param	time
 		 */
 		public function set currentTime (time:Number):void {
+			this.pause();
 			this._currentTime = time;
+			this.play(time);
+			
 		}
 		
 		public function get volume ():Number {
@@ -133,10 +140,14 @@ package
 		 * @param	volume
 		 */
 		public function set volume (volume:Number):void {
-			//TODO  реалтзовать функционал
-			this._volume = volume;
-			this.trans.volume = this._volume;
-			this.soundChannel.soundTransform = this.trans;
+			try {
+				this._volume = volume;
+				this.trans.volume = this._volume;	
+				this.soundChannel.soundTransform = this.trans;	
+			}
+			catch (error:Error) {
+				ExternalInterface.call('console.log',error.message);
+			}
 		}
 		/**
 		 * 
@@ -149,15 +160,17 @@ package
 		  * @param	mute 
 		 */
 		public function set mute (mute:Boolean):void {
-			//TODO  реалтзовать функционал
-			this._mute = mute;
-			if (this._mute === true) {
-				this._lastVolume = this.volume;
-				this.volume = 0;
+			if (this._mute != mute) {
+				this._mute = mute;
+				if (this._mute === true) {
+					this._lastVolume = this.volume;
+					this.volume = 0;
+				}
+				else {
+					this.volume = this._lastVolume;
+				}
 			}
-			else {
-				this.volume = this._lastVolume;
-			}
+			
 		}
 		/**
 		 * 
@@ -240,7 +253,7 @@ package
 			this.sound.addEventListener(ProgressEvent.PROGRESS, this.onProgressLoad);	
 			this.sound.addEventListener(IOErrorEvent.IO_ERROR, this.errorHandler);
 			this.sound.load(req);
-		//	this.play(0);
+			this.dispatchEvent(new Event(AudioProvider.EventList.ON_LOADSTARR));
 			return this;
 		}
 		/**
@@ -252,6 +265,9 @@ package
 				if (this.isPlaying == true) {
 					return this;
 				}
+				if (time == 0 && this._currentTime > 0) {
+					time = this._currentTime;
+				}
 				this.pause();
 				this.soundChannel = this.sound.play(time,0,this.trans);	
 				this.trans.volume = this._volume;			
@@ -259,6 +275,7 @@ package
 				//this.addEventListener(Event.ENTER_FRAME, this.onEnterFrame);
 				this.soundChannel.addEventListener(Event.SOUND_COMPLETE, this.onPlaybackComplete);	
 				this.isPlaying = true;
+				this.dispatchEvent(new Event(AudioProvider.EventList.ON_PLAY));
 				trace('play');
 			}
 			catch (error:Error) {
@@ -275,11 +292,12 @@ package
 			if (!this.isPlaying) {
 				return this;
 			}
+			this._currentTime = this.currentTime;
 			this.soundChannel.stop();
 			this.isPlaying = false;
 			this.removeEventListener(Event.ENTER_FRAME, this.onEnterFrame);
 			this.soundChannel.addEventListener(Event.SOUND_COMPLETE, this.onPlaybackComplete);	
-			trace('pause');
+			this.dispatchEvent(new Event(AudioProvider.EventList.ON_PAUSE));
 			return this;
 		}
 		
@@ -378,6 +396,7 @@ package
 		 * @param	event
 		 */
 		private function errorHandler (event:IOErrorEvent):void {
+			this.dispatchEvent(new Event(AudioProvider.EventList.ON_ERROR));
 			trace(event.text);
 		}
 		
