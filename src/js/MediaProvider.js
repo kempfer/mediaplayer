@@ -29,24 +29,24 @@
             provider.on(eventList.join(' '), function (e) {
                 console.log(e.type);
             });
-        },500);
+        },50);
         
         return provider;
     };
     
-	var MediaPlayer = function (options) {
-		if(!(this instanceof MediaPlayer)){
-			return new MediaPlayer(options);
+	var MediaProvider = function (options) {
+		if(!(this instanceof MediaProvider)){
+			return new MediaProvider(options);
 		}
         
-        this.options = t.combine(MediaPlayer.defaultOptions, options);
+        this.options = t.combine(MediaProvider.defaultOptions, options);
         this.provider = createProvider(this.options);
         return this;
 	};
     
-    MediaPlayer.prototype = {
+    MediaProvider.prototype = {
         
-        constructor : MediaPlayer,
+        constructor : MediaProvider,
         
         type : null,
         
@@ -114,7 +114,7 @@
          * 
          * @param {Mixed} key
          * @param {Mixed} value
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         set : function (key, value) {
             var k;
@@ -141,7 +141,7 @@
         /**
          * 
          * @param {Mixed} selector
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         appendTo : function (selector) {
             t.dom(selector).append(this.provider.element);
@@ -150,7 +150,7 @@
         /**
 		*
 		* Toggle playback
-		*@return {MediaPlayer}
+		*@return {MediaProvider}
 		*/
 		toggle : function () {
 			if(this.provider.played){
@@ -163,7 +163,7 @@
 		},
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         play : function () {
             this.provider.play();
@@ -179,7 +179,7 @@
         },
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         stop : function () {
             this.provider.setTime(0);
@@ -188,7 +188,7 @@
         }, 
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         load : function () {
             this.provider.load();
@@ -196,7 +196,7 @@
         },
         /**
          * @param {Boolean} muted
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         setMuted : function (muted) {
             return this.provider.setMuted(muted);
@@ -205,7 +205,7 @@
         /**
 		*
 		*@param {Number} value
-		*@return {MediaPlayer}
+		*@return {MediaProvider}
 		*/
 		setVolume : function  (value) {
 			this.provider.setVolume(value);
@@ -213,16 +213,16 @@
 		}
     };
     
-    MediaPlayer.constants = {
+    MediaProvider.constants = {
         HTML5 : 1,
         AUDIO : 2,
         VIDEO : 3,
         FLASH : 4
     };
     
-	MediaPlayer.defaultOptions = {
-		type : MediaPlayer.constants.AUDIO,
-		use : MediaPlayer.constants.HTML5,
+	MediaProvider.defaultOptions = {
+		type : MediaProvider.constants.AUDIO,
+		use : MediaProvider.constants.HTML5,
         loop : false,
         autoplay : false,
         preload : false,
@@ -234,7 +234,7 @@
     
    
     
-    MediaPlayer.supportAudioHTML5 = function supportAudioHTML5() {
+    MediaProvider.supportAudioHTML5 = function supportAudioHTML5() {
         return (!window.HTMLAudioElement) ? false : true;
     };
     

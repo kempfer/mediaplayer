@@ -160,19 +160,22 @@
 		*@return {FlashMediaProvider}
 		*/		
         load : function () {
-            console.log(this.element);
             this.element.load(this.options['source'][0].src);
             return this;
         },
         on : function (event, func) {
-            events[event] = func;
-            this.element.on(event, '');
+            event.split(" ").forEach(function (el) {
+                events[el] = func;
+            }.bind(this));
+        },
+        frequencyData : function () {
+            return this.element.frequencyData();
         }
         
     };
     FlashMediaProvider.eventHandler = function (type) {
         if(events[type]) {
-            events[type]();
+            events[type]({type : type});
         }
     };
     FlashMediaProvider.defaultOptions = {
