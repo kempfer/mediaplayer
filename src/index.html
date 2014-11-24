@@ -16,7 +16,7 @@ and open the template in the editor.
         <script type="text/javascript"  src="js/teq/TeqObject.js"></script>
         <script type="text/javascript"  src="js/teq/TeqString.js"></script>
         <script type="text/javascript"  src="js/teq/TeqDom.js"></script>
-        <script type="text/javascript"  src="js/MediaPlayer.js"></script>
+        <script type="text/javascript"  src="js/MediaProvider.js"></script>
         <script type="text/javascript"  src="js/FlashMediaProvider.js"></script>
         <script type="text/javascript"  src="js/HTML5MediaProvider.js"></script>
     </head>
@@ -28,7 +28,8 @@ and open the template in the editor.
                 player = new window.MP({
                     source : [
                         {
-                            src : 'qww1.mp3',
+                            src : 'http://mediaplayer.loc/qww1.mp3',
+                            //src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',			
                             type : 'audio/mpeg'
                         }
                     ],

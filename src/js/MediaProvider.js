@@ -7,7 +7,16 @@
 		'canplay','canplaythrough','playing','waiting','seeking','seeked','ended','durationchange','timeupdate',
 		'play','pause','ratechange','resize','volumechange'
 	],
-    
+    canPlayType = function (type,source) {
+        var i, support = false;
+        for(i = 0; i < source.length; i++){
+           if(MP.HTML5Provider.canPlayType(type,source[i].type)){
+               support = true;
+               break;
+           }
+        }
+        return support;
+    },
     createProvider = function createProvider (options) {
         var provider, providerOptions;
         providerOptions = {
@@ -19,15 +28,20 @@
             autobuffer : options['autobuffer'],
             volume : options['volume']
         };
-        if( options['use'] === MediaPlayer.constants.FLASH){
-            provider = new window.MP.FlashProvider(providerOptions);
+        if( 
+            options['use'] === MediaProvider.constants.HTML5    &&
+            MediaProvider.supportAudioHTML5()                   &&
+            canPlayType(options['type'],options['source'])
+        ){
+            provider = new window.MP.HTML5Provider(providerOptions);
         }
         else{
-            provider = new window.MP.HTML5Provider(providerOptions);
+            provider = new window.MP.FlashProvider(providerOptions);
+           
         }
         setTimeout(function () {
             provider.on(eventList.join(' '), function (e) {
-                console.log(e.type);
+               // console.log(e.type);
             });
         },50);
         
@@ -238,10 +252,10 @@
         return (!window.HTMLAudioElement) ? false : true;
     };
     
-    MediaPlayer.supportVideoHTML5 = function supportVideoHTML5 () {
+    MediaProvider.supportVideoHTML5 = function supportVideoHTML5 () {
         return (!window.HTMLVideoElement) ? false : true;
     };
     
-    window.MP = MediaPlayer;
+    window.MP = MediaProvider ;
 	 
 })(window);

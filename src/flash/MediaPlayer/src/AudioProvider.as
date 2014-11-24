@@ -25,7 +25,8 @@ package
 			ON_LOADSTARR: 'loadstart',
 			ON_PLAY : 'play',
 			ON_PAUSE : 'pause',
-			ON_ERROR : 'error'
+			ON_ERROR : 'error',
+			ON_TIMEUPDATE : 'timeupdate'
 		};
 		
 		private var sound:Sound;
@@ -272,7 +273,7 @@ package
 				this.soundChannel = this.sound.play(time,0,this.trans);	
 				this.trans.volume = this._volume;			
 				this.soundChannel.soundTransform = this.trans;			
-				//this.addEventListener(Event.ENTER_FRAME, this.onEnterFrame);
+				this.addEventListener(Event.ENTER_FRAME, this.onEnterFrame);
 				this.soundChannel.addEventListener(Event.SOUND_COMPLETE, this.onPlaybackComplete);	
 				this.isPlaying = true;
 				this.dispatchEvent(new Event(AudioProvider.EventList.ON_PLAY));
@@ -405,16 +406,7 @@ package
 		 * @param	event
 		 */
 		private function onEnterFrame (event:Event):void {
-			SoundMixer.computeSpectrum(this.byteFrequencyData , false, 0);		
-			this._currentTime = soundChannel.position;
-			this.arrayFrequencyData = [];
-			var _local1:int;
-			var _local2:int = this.byteFrequencyData.length/4;
-			while (_local1 < _local2) {
-				this.arrayFrequencyData.push(int(this.byteFrequencyData.readFloat() * 1000));
-				_local1++;
-			}
-			this.getCurrentTime();
+			this.dispatchEvent(new Event(AudioProvider.EventList.ON_TIMEUPDATE));
 			//trace(this.currentTime);
 		}
 		

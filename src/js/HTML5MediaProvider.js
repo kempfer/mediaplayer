@@ -157,21 +157,6 @@
             this.element.load();
             return this;
         },
-        /**
-         * 
-         * @param {String} type
-         * @returns {Boolean}
-         */
-        canPlayType : function (type) {
-            var provider;
-            if(this.options['type'] === MP.constants.AUDIO) {
-                provider = document.createElement('audio');
-            }
-            else{
-                provider = document.createElement('video');
-            }
-            return !!(provider.canPlayType && provider.canPlayType(type).replace(/no/, ''));
-        },
         on : function (event, callback ) {
             t.dom(this.element).bind(event,callback);
         }
@@ -187,6 +172,23 @@
         type : MP.constants.AUDIO,
         source : []
     };
+    
+    /**
+    * 
+    * @param {String} type
+    * @param {String} source
+    * @returns {Boolean}
+    */
+    HTML5MediaProvider.canPlayType = function (type,source) {
+            var provider;
+            if(type === MP.constants.AUDIO) {
+                provider = document.createElement('audio');
+            }
+            else{
+                provider = document.createElement('video');
+            }
+            return !!(provider.canPlayType && provider.canPlayType(source).replace(/no/, ''));
+        },
     
     MP.HTML5Provider = HTML5MediaProvider;
 })(window,window.MP,document);

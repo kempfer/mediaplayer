@@ -28,6 +28,8 @@ package
 			this.provider.addEventListener(AudioProvider.EventList.ON_PLAY, this.eventHandler);
 			this.provider.addEventListener(AudioProvider.EventList.ON_PAUSE, this.eventHandler);
 			this.provider.addEventListener(AudioProvider.EventList.ON_ERROR, this.eventHandler);
+			this.provider.addEventListener(AudioProvider.EventList.ON_TIMEUPDATE, this.eventHandler);
+			//
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			if (ExternalInterface.available) {
 				try {
