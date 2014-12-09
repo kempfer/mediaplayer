@@ -22,6 +22,8 @@ and open the template in the editor.
     </head>
     <body>
         <div id="altContent"></div>
+        <button id="play">Play</button>
+        
         <script>
             var player;
             t.dom.onReady(function () {
@@ -33,8 +35,25 @@ and open the template in the editor.
                             type : 'audio/mpeg'
                         }
                     ],
-                    autoplay : true,
+                    onLoad : function () {
+                        console.log('Load: ' + this.progressLoad);
+                    },
+                    onTimeUpdate: function () {
+                        console.log('Time: ' + this.time);
+                    },
+                    autoplay : false,
                     use : MP.constants.FLASH
+                    //use : MP.constants.HTML5
+                });
+                t.dom('#play').bind('click', function () {
+                    if(t.dom('#play').html == 'Play'){
+                       t.dom('#play').html = 'Pause';
+                    }
+                    else{
+                        t.dom('#play').html = 'Play';
+                    }
+                    player.toggle();
+                    
                 });
                 //player.appendTo('body');
             });

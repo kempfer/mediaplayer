@@ -16,7 +16,7 @@
 	};
     
     var HTML5MediaProvider = function (options) {
-        
+        var eventCreate;
         if(!(this instanceof HTML5MediaProvider)){
 			return new HTML5MediaProvider(options);
 		}
@@ -33,6 +33,10 @@
 			}
 		}.bind(this));
         addSourceToMedia(this.element,this.options['source']);
+        eventCreate = new CustomEvent('create',this);
+        setTimeout(function () {
+            this.options['onCreate'].call(this);
+        }.bind(this),5);
         return this;
     };
     
@@ -170,7 +174,8 @@
         volume : 100,
         controls : false,
         type : MP.constants.AUDIO,
-        source : []
+        source : [],
+        onCreate : t.emptyFunc()
     };
     
     /**

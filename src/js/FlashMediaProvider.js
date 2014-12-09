@@ -4,8 +4,7 @@
     'use strict';
      
     var addSwfobject = function (options,callBack) {
-        var flashvars = {
-		};
+        var flashvars = {};
 		var params = {
 			menu: "false",
 			scale: "noScale",
@@ -24,7 +23,7 @@
 			flashvars, params, attributes,embedHandler);
         function embedHandler (e) {
              var id = setInterval(function (){
-                if(e.ref.PercentLoaded() === 100){
+                if(e.ref && e.ref.PercentLoaded() === 100){
                     clearInterval(id);
                     callBack(e);
                 }
@@ -35,7 +34,6 @@
     
     
     var FlashMediaProvider = function (options) {
-        
         if(!(this instanceof FlashMediaProvider)){
 			return new FlashMediaProvider(options);
 		}
@@ -43,6 +41,7 @@
         addSwfobject(this.options, function (e) {
             this.element = e.ref;
             this.load();
+            this.options['onCreate'].call(this);
             if(this.options['autoplay'] === true){
                 this.play();
             }
@@ -87,7 +86,7 @@
 		*@return {Number} current time
 		*/
 		get time () {
-			return this.element.time();
+			return this.element.time()/1000;
 		},
 		/**
 		* Get duration video
@@ -187,7 +186,8 @@
         controls : false,
         type : MP.constants.AUDIO,
         source : [],
-        pathToFlash : 'flash/MediaPlayer/bin/MediaPlayer.swf'
+        pathToFlash : 'flash/MediaPlayer/bin/MediaPlayer.swf',
+        onCreate : t.emptyFunc()
     };
     MP.FlashProvider = FlashMediaProvider;
     

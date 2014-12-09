@@ -5,7 +5,7 @@
     var eventList = [
 		'loadstart','progress','suspend','abort','error','emptied','stalled','loadedmetadata','loadeddata',
 		'canplay','canplaythrough','playing','waiting','seeking','seeked','ended','durationchange','timeupdate',
-		'play','pause','ratechange','resize','volumechange'
+		'play','pause','ratechange','resize','volumechange,create'
 	],
     canPlayType = function (type,source) {
         var i, support = false;
@@ -17,7 +17,7 @@
         }
         return support;
     },
-    createProvider = function createProvider (options) {
+    createProvider = function createProvider (options,self) {
         var provider, providerOptions;
         providerOptions = {
             type : options['type'],
@@ -26,7 +26,31 @@
             loop : options['loop'],
             preload : options['preload'],
             autobuffer : options['autobuffer'],
-            volume : options['volume']
+            volume : options['volume'],
+            onCreate : function () {
+                console.log(options);
+                provider.on('progress' , options['onLoad'].bind(self));
+                provider.on('play' , options['onPlay'].bind(self));
+                provider.on('pause' , options['onPause'].bind(self));
+                provider.on('timeupdate' , options['onTimeUpdate'].bind(self));
+               /* provider.on(eventList.join(' '), function (e) {
+                    switch(e.type) {
+                        case 'progress' :
+                            console.log(self);
+                            self.options['onLoad'].call(self);
+                        break;
+                        case 'onTimeUpdate' :
+                            self.options['onTimeUpdate'].call(self);
+                        break;
+                        case 'play':
+                            self.options['onPlay'].call(self);
+                        case 'pause' : 
+                            self.options['onPause'].call(self);
+                        break;
+                            
+                    }
+                });*/
+            }.bind(self)
         };
         if( 
             options['use'] === MediaProvider.constants.HTML5    &&
@@ -37,14 +61,7 @@
         }
         else{
             provider = new window.MP.FlashProvider(providerOptions);
-           
         }
-        setTimeout(function () {
-            provider.on(eventList.join(' '), function (e) {
-               // console.log(e.type);
-            });
-        },50);
-        
         return provider;
     };
     
@@ -54,7 +71,7 @@
 		}
         
         this.options = t.combine(MediaProvider.defaultOptions, options);
-        this.provider = createProvider(this.options);
+        this.provider = createProvider(this.options, this);
         return this;
 	};
     
@@ -243,7 +260,11 @@
         autobuffer : false,
         volume : 100,
         controls : false,
-        source : []
+        source : [],
+        onLoad : t.emptyFunc,
+        onTimeUpdate : t.emptyFunc,
+        onPlay : t.emptyFunc,
+        onPause : t.emptyFunc
 	};
     
    
