@@ -28,28 +28,7 @@
             autobuffer : options['autobuffer'],
             volume : options['volume'],
             onCreate : function () {
-                console.log(options);
-                provider.on('progress' , options['onLoad'].bind(self));
-                provider.on('play' , options['onPlay'].bind(self));
-                provider.on('pause' , options['onPause'].bind(self));
-                provider.on('timeupdate' , options['onTimeUpdate'].bind(self));
-               /* provider.on(eventList.join(' '), function (e) {
-                    switch(e.type) {
-                        case 'progress' :
-                            console.log(self);
-                            self.options['onLoad'].call(self);
-                        break;
-                        case 'onTimeUpdate' :
-                            self.options['onTimeUpdate'].call(self);
-                        break;
-                        case 'play':
-                            self.options['onPlay'].call(self);
-                        case 'pause' : 
-                            self.options['onPause'].call(self);
-                        break;
-                            
-                    }
-                });*/
+                options['onCreate'](self);
             }.bind(self)
         };
         if( 
@@ -241,7 +220,18 @@
 		setVolume : function  (value) {
 			this.provider.setVolume(value);
 			return this;
-		}
+		},
+
+        /**
+         * 
+         * @param {Mixed} event
+         * @param {Function} func
+         * @return {MediaProvider}
+         */
+        on : function (event, func) {
+            this.provider.on(event,func.bind(this));
+            return this;
+        }
     };
     
     MediaProvider.constants = {
@@ -261,10 +251,7 @@
         volume : 100,
         controls : false,
         source : [],
-        onLoad : t.emptyFunc,
-        onTimeUpdate : t.emptyFunc,
-        onPlay : t.emptyFunc,
-        onPause : t.emptyFunc
+        onCreate : t.emptyFunc
 	};
     
    

@@ -35,12 +35,7 @@ and open the template in the editor.
                             type : 'audio/mpeg'
                         }
                     ],
-                    onLoad : function () {
-                        console.log('Load: ' + this.progressLoad);
-                    },
-                    onTimeUpdate: function () {
-                        console.log('Time: ' + this.time);
-                    },
+                    onCreate : init,
                     autoplay : false,
                     use : MP.constants.FLASH
                     //use : MP.constants.HTML5
@@ -55,6 +50,14 @@ and open the template in the editor.
                     player.toggle();
                     
                 });
+                function init () {
+                    player.on('progress', function () {
+                         console.log('Load: ' + this.progressLoad);
+                    });
+                    player.on('timeupdate', function () {
+                         console.log('Time: ' + this.time);
+                    });
+                }
                 //player.appendTo('body');
             });
         </script>
