@@ -28,6 +28,7 @@
             autobuffer : options['autobuffer'],
             volume : options['volume'],
             onCreate : function () {
+                self.provider.setVolume(options['volume']);
                 options['onCreate'](self);
             }.bind(self)
         };

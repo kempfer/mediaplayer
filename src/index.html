@@ -23,14 +23,14 @@ and open the template in the editor.
     <body>
         <div id="altContent"></div>
         <button id="play">Play</button>
-        
+        Value: <input type="range" max="100" value="100" id="volume-change" min="0">
         <script>
             var player;
             t.dom.onReady(function () {
                 player = new window.MP({
                     source : [
                         {
-                            src : 'http://mediaplayer.loc/qww1.mp3',
+                            src : 'http://mediaplayer.loc/02 - Ameno (remix).mp3',
                             //src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',			
                             type : 'audio/mpeg'
                         }
@@ -49,6 +49,9 @@ and open the template in the editor.
                     }
                     player.toggle();
                     
+                });
+                t.dom('#volume-change').bind('change', function (){
+                    player.setVolume(this.value);
                 });
                 function init () {
                     player.on('progress', function () {
