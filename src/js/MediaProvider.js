@@ -222,7 +222,6 @@
 			this.provider.setVolume(value);
 			return this;
 		},
-
         /**
          * 
          * @param {Mixed} event
@@ -231,6 +230,14 @@
          */
         on : function (event, func) {
             this.provider.on(event,func.bind(this));
+            return this;
+        },
+        /**
+         * 
+         * @return {MediaProvider}
+         */
+        destroy : function () {
+            this.provider.destroy();
             return this;
         }
     };

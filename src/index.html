@@ -19,39 +19,53 @@ and open the template in the editor.
         <script type="text/javascript"  src="js/MediaProvider.js"></script>
         <script type="text/javascript"  src="js/FlashMediaProvider.js"></script>
         <script type="text/javascript"  src="js/HTML5MediaProvider.js"></script>
+        <style>
+            #play:after {
+                content: '\25BA';
+                padding-left: 5px;
+                line-height: 39px;
+                font-size: 25px;
+            }
+        </style>
     </head>
+    
     <body>
         <div id="altContent"></div>
-        <button id="play">Play</button>
+        <input type="file" id="select-file">
+        <button id="play"></button>
         Value: <input type="range" max="100" value="100" id="volume-change" min="0">
         <script>
-            var player;
+            var player = null;
             t.dom.onReady(function () {
-                player = new window.MP({
-                    source : [
-                        {
-                            src : 'http://mediaplayer.loc/02 - Ameno (remix).mp3',
-                            //src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',			
-                            type : 'audio/mpeg'
-                        }
-                    ],
-                    onCreate : init,
-                    autoplay : false,
-                    use : MP.constants.FLASH
-                    //use : MP.constants.HTML5
-                });
+                
                 t.dom('#play').bind('click', function () {
-                    if(t.dom('#play').html == 'Play'){
-                       t.dom('#play').html = 'Pause';
-                    }
-                    else{
-                        t.dom('#play').html = 'Play';
-                    }
                     player.toggle();
-                    
                 });
                 t.dom('#volume-change').bind('change', function (){
                     player.setVolume(this.value);
+                });
+                t.dom('#select-file').bind('change', function () {
+                    var reader = new FileReader();
+                    var type = this.files[0].type;
+                    if(player !== null){
+                        player.destroy();
+                    }
+                    reader.onload = function (file) {
+                        player = new window.MP({
+                            source : [
+                                {
+                                    src : file.currentTarget.result,
+                                    //src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',			
+                                    type : type
+                                }
+                            ],
+                            onCreate : init,
+                            autoplay : false,
+                            use : MP.constants.FLASH
+                            //use : MP.constants.HTML5
+                        });
+                    }
+                    reader.readAsDataURL(this.files[0]);
                 });
                 function init () {
                     player.on('progress', function () {

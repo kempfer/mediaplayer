@@ -167,6 +167,14 @@
                 events[el] = func;
             }.bind(this));
         },
+         /**
+		*
+		*@return {HTML5MediaProvider}
+		*/		
+        destroy : function () {
+            this.element.stop();
+            t.dom(this.element).remove();
+        },
         frequencyData : function () {
             return this.element.frequencyData();
         }

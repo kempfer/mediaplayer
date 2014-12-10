@@ -161,8 +161,23 @@
             this.element.load();
             return this;
         },
+        /**
+         * 
+         * @param {Mixed} event
+         * @param {Function} func
+         * @return {HTML5MediaProvider}
+         */
         on : function (event, callback ) {
             t.dom(this.element).bind(event,callback);
+            return this;
+        },
+        /**
+		*
+		*@return {HTML5MediaProvider}
+		*/		
+        destroy : function () {
+            this.pause();
+            t.dom(this.element).remove();
         }
     };
     
