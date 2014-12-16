@@ -8,11 +8,13 @@
     'use strict';
 
     
-    var playList = function (options) {
+    var playList = function (tracks) {
         if(!(this instanceof playList)){
-			return new playList(options);
+			return new playList(tracks);
 		}
         this._tracks = [];
+        this.push(tracks);
+        this._currentTrack = this._tracks[0];
         this._current = null;
         return this;
     };
@@ -32,6 +34,11 @@
 		get currentTrack () {
 			return this._currentTrack;
 		},
+        
+        set currentTrack (track) {
+            this._currentTrack = track;
+        },
+        
         /**
 		*
 		*Returns the number of tracks
@@ -54,50 +61,42 @@
 			}
 			return nextTrack;
 		},
-		/**
-		*
-		*
-		*@return Object
-		*/
+        /**
+         * 
+         * @returns {Track}
+         */
+        get prevTrack () {
+            var index, prevTrack;
+			index = this._currentTrack.index;					
+			prevTrack = this._tracks[index - 1 ];			
+			if(!prevTrack){								
+				prevTrack = this._tracks[this._currentTrack.length - 1];				
+			}
+			return prevTrack;
+        },
+        /**
+         * 
+         * @returns {Track}
+         */
 		get latsTrack () {
 			return this._tracks[this._tracks.length - 1];
 		},
-        /**
-         * 
-         * @returns {playList}
-         */
-        playNext : function () {
-            
-        },
-        /**
-         * 
-         * @returns {playList}
-         */
-        playPrev : function () {
-            
-        },
-        /**
-         * 
-         * @param {Number} index
-         * @returns {playList}
-         */
-        play : function (index) {
-            
-        },
         /**
          * 
          * @param {Mixed} track
          * @returns {playList}
          */
         push : function (track){
-            var i,
+            var i,resurse,
                 tracks = track;
             if(!t.isArray(track)) {
                 tracks = [track];
             }
             for(i = 0; i <  tracks.length; i++){
+                resurse = tracks[i];
+                resurse.index = this._tracks.length;
                 this._tracks.push(
-                    new window.PlayList.track(tracks[i])
+                    new window.zpTrack(resurse)
                 );
             }
         },
@@ -108,7 +107,7 @@
          */
         unshift : function (track) {
             this._tracks.unshift(
-                new window.PlayList.track(track)
+                new window.zpTrack(track)
             );
         },
         /**
@@ -126,44 +125,75 @@
         removeTrack : function (index) {
             
         },
-        on : function () {
+        on : function (event, func) {
             
+            return this;
         }
         
     };
     
-    window.PlayList = playList;
+    window.zpPlayList = playList;
     
 })();
 
 
-;(function (PL) {
+;(function (window) {
     
     'use strict';
     
-    var track = function (options) {
-        if(!(this instanceof track)){
-			return new track(options);
+    var Track = function (options) {
+        if(!(this instanceof Track)){
+			return new Track(options);
 		}
         this.options = options;
         this.id = t.uniqueId();
+        this.index = this.options['index'];
+        this.init(100);
         return this;
     };
-    track.prototype = {
+    Track.prototype = {
         
         id : null,
         
         provider : null,
         
-        constructor : track,
+        constructor : Track,
         
-        init : function () {
-            
+        index : 0,
+        
+        init : function (volume,autoplay) {
+            autoplay = autoplay || false;
+            this.provider = new window.MP({
+                source : this.options['source'],
+                autoplay : autoplay,
+                use : window.MP.constants.HTML5,
+                volume : volume
+            });
+        },
+        play : function (volume) {
+            if(this.provider instanceof window.MP){
+                this.provider.play();
+            }
+            else{
+                this.init(volume,true);
+            }
+            return this;
+        },
+        pause : function () {
+            if(this.provider instanceof window.MP){
+                this.provider.pause();
+            }
+            return this;
         },
         stop : function () {
-            
+            if(this.provider instanceof window.MP){
+                this.provider.destroy();
+            }
+            this.provider = null;
+            this.init();
+            return this;
         }
     };
     
-    PL.track = track;
-})(window.PlayList);
+    window.zpTrack = Track;
+})(window);

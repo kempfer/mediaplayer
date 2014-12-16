@@ -129,7 +129,9 @@
 		*@return {HTML5MediaProvider}
 		*/
 		setVolume : function  (value) {
-			this.element.volume = value / 100;
+            if(value !== undefined) {
+                this.element.volume = value / 100;
+            }
 			return this;
 		},
         /**
@@ -176,8 +178,10 @@
 		*@return {HTML5MediaProvider}
 		*/		
         destroy : function () {
+            this.setTime(0);
             this.pause();
             t.dom(this.element).remove();
+            this.element = null;
         }
     };
     
