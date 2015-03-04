@@ -16,7 +16,7 @@
 	};
     
     var HTML5MediaProvider = function (options) {
-        
+        var eventCreate;
         if(!(this instanceof HTML5MediaProvider)){
 			return new HTML5MediaProvider(options);
 		}
@@ -33,6 +33,10 @@
 			}
 		}.bind(this));
         addSourceToMedia(this.element,this.options['source']);
+        eventCreate = new CustomEvent('create',this);
+        setTimeout(function () {
+            this.options['onCreate'].call(this);
+        }.bind(this),5);
         return this;
     };
     
@@ -125,7 +129,9 @@
 		*@return {HTML5MediaProvider}
 		*/
 		setVolume : function  (value) {
-			this.element.volume = value / 100;
+            if(value !== undefined) {
+                this.element.volume = value / 100;
+            }
 			return this;
 		},
         /**
@@ -159,21 +165,23 @@
         },
         /**
          * 
-         * @param {String} type
-         * @returns {Boolean}
+         * @param {Mixed} event
+         * @param {Function} func
+         * @return {HTML5MediaProvider}
          */
-        canPlayType : function (type) {
-            var provider;
-            if(this.options['type'] === MP.constants.AUDIO) {
-                provider = document.createElement('audio');
-            }
-            else{
-                provider = document.createElement('video');
-            }
-            return !!(provider.canPlayType && provider.canPlayType(type).replace(/no/, ''));
-        },
         on : function (event, callback ) {
             t.dom(this.element).bind(event,callback);
+            return this;
+        },
+        /**
+		*
+		*@return {HTML5MediaProvider}
+		*/		
+        destroy : function () {
+            this.setTime(0);
+            this.pause();
+            t.dom(this.element).remove();
+            this.element = null;
         }
     };
     
@@ -185,8 +193,26 @@
         volume : 100,
         controls : false,
         type : MP.constants.AUDIO,
-        source : []
+        source : [],
+        onCreate : t.emptyFunc()
     };
+    
+    /**
+    * 
+    * @param {String} type
+    * @param {String} source
+    * @returns {Boolean}
+    */
+    HTML5MediaProvider.canPlayType = function (type,source) {
+            var provider;
+            if(type === MP.constants.AUDIO) {
+                provider = document.createElement('audio');
+            }
+            else{
+                provider = document.createElement('video');
+            }
+            return !!(provider.canPlayType && provider.canPlayType(source).replace(/no/, ''));
+        },
     
     MP.HTML5Provider = HTML5MediaProvider;
 })(window,window.MP,document);

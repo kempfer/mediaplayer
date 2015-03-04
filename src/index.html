@@ -9,29 +9,86 @@ and open the template in the editor.
         <title>Media Player</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript"  src="js/swfobject.js"></script>
         <script type="text/javascript"  src="js/teq/Teq.js"></script>
         <script type="text/javascript"  src="js/teq/TeqArray.js"></script>
         <script type="text/javascript"  src="js/teq/TeqNumber.js"></script>
         <script type="text/javascript"  src="js/teq/TeqObject.js"></script>
         <script type="text/javascript"  src="js/teq/TeqString.js"></script>
         <script type="text/javascript"  src="js/teq/TeqDom.js"></script>
-        <script type="text/javascript"  src="js/MediaPlayer.js"></script>
+        <script type="text/javascript"  src="js/MediaProvider.js"></script>
         <script type="text/javascript"  src="js/FlashMediaProvider.js"></script>
         <script type="text/javascript"  src="js/HTML5MediaProvider.js"></script>
+        <style>
+            #play:after {
+                content: '\25BA';
+                padding-left: 5px;
+                line-height: 39px;
+                font-size: 25px;
+            }
+            .player-progress {
+                background: #000;
+            }
+            .progressbar-value {
+                background:red;
+                height: 100%;
+                width: 0px;
+            }
+        </style>
     </head>
+    
     <body>
+        <div id="altContent"></div>
+        <input type="file" id="select-file">
+        <button id="play"></button>
+        Value: <input type="range" max="100" value="100" id="volume-change" min="0">
+        <br>
+        <div class="player-progress" style="height: 10px;" title="0:03">
+            <div class="progressbar-value" style=""></div>
+        </div>
         <script>
-            var player;
+            var player = null;
             t.dom.onReady(function () {
-                player = new window.MP({
-                    source : [
-                        {
-                            src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',
-                            type : 'audio/mpeg'
-                        }
-                    ],
-                    autoplay : true
+                
+                t.dom('#play').bind('click', function () {
+                    player.toggle();
                 });
+                t.dom('#volume-change').bind('change', function (){
+                    player.setVolume(this.value);
+                });
+                t.dom('#select-file').bind('change', function () {
+                    var reader = new FileReader();
+                    var type = this.files[0].type;
+                    if(player !== null){
+                        player.destroy();
+                    }
+                    reader.onload = function (file) {
+                        player = new window.MP({
+                            source : [
+                                {
+                                    src : file.currentTarget.result,
+                                    //src : 'https://p.scdn.co/mp3-preview/ad08f5af946e45965fa215cf54b9b99bcca69df6',			
+                                    type : type
+                                }
+                            ],
+                            onCreate : init,
+                            autoplay : false,
+                            //use : MP.constants.FLASH
+                            use : MP.constants.HTML5
+                        });
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                });
+                function init () {
+                    player.on('progress', function () {
+                        
+                         console.log('Load: ' + this.progressLoad);
+                    });
+                    player.on('timeupdate', function () {
+                        //console.log(this.progress );
+                        t.dom('.progressbar-value').css('width',this.progress + '%');
+                    });
+                }
                 //player.appendTo('body');
             });
         </script>

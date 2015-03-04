@@ -5,41 +5,59 @@
     var eventList = [
 		'loadstart','progress','suspend','abort','error','emptied','stalled','loadedmetadata','loadeddata',
 		'canplay','canplaythrough','playing','waiting','seeking','seeked','ended','durationchange','timeupdate',
-		'play','pause','ratechange','resize','volumechange'
+		'play','pause','ratechange','resize','volumechange,create'
 	],
-    
-    createProvider = function createProvider (options) {
-        var provider;
-        if( options['use'] === MediaPlayer.constants.HTML5){
-            provider = new window.MP.HTML5Provider({
-                type : options['type'],
-                source : options['source'],
-                autoplay :  options['autoplay'],
-                loop : options['loop'],
-                preload : options['preload'],
-                autobuffer : options['autobuffer'],
-                volume : options['volume']
-            });
+    canPlayType = function (type,source) {
+        var i, support = false;
+        for(i = 0; i < source.length; i++){
+           if(MP.HTML5Provider.canPlayType(type,source[i].type)){
+               support = true;
+               break;
+           }
         }
-        provider.on(eventList.join(' '), function (e) {
-            console.log(e.type);
-        });
+        return support;
+    },
+    createProvider = function createProvider (options,self) {
+        var provider, providerOptions;
+        providerOptions = {
+            type : options['type'],
+            source : options['source'],
+            autoplay :  options['autoplay'],
+            loop : options['loop'],
+            preload : options['preload'],
+            autobuffer : options['autobuffer'],
+            volume : options['volume'],
+            onCreate : function () {
+                self.provider.setVolume(options['volume']);
+                options['onCreate'](self);
+            }.bind(self)
+        };
+        if( 
+            options['use'] === MediaProvider.constants.HTML5    &&
+            MediaProvider.supportAudioHTML5()                   &&
+            canPlayType(options['type'],options['source'])
+        ){
+            provider = new window.MP.HTML5Provider(providerOptions);
+        }
+        else{
+            provider = new window.MP.FlashProvider(providerOptions);
+        }
         return provider;
     };
     
-	var MediaPlayer = function (options) {
-		if(!(this instanceof MediaPlayer)){
-			return new MediaPlayer(options);
+	var MediaProvider = function (options) {
+		if(!(this instanceof MediaProvider)){
+			return new MediaProvider(options);
 		}
         
-        this.options = t.combine(MediaPlayer.defaultOptions, options);
-        this.provider = createProvider(this.options);
+        this.options = t.combine(MediaProvider.defaultOptions, options);
+        this.provider = createProvider(this.options, this);
         return this;
 	};
     
-    MediaPlayer.prototype = {
+    MediaProvider.prototype = {
         
-        constructor : MediaPlayer,
+        constructor : MediaProvider,
         
         type : null,
         
@@ -107,7 +125,7 @@
          * 
          * @param {Mixed} key
          * @param {Mixed} value
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         set : function (key, value) {
             var k;
@@ -134,7 +152,7 @@
         /**
          * 
          * @param {Mixed} selector
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         appendTo : function (selector) {
             t.dom(selector).append(this.provider.element);
@@ -143,7 +161,7 @@
         /**
 		*
 		* Toggle playback
-		*@return {MediaPlayer}
+		*@return {MediaProvider}
 		*/
 		toggle : function () {
 			if(this.provider.played){
@@ -156,7 +174,7 @@
 		},
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         play : function () {
             this.provider.play();
@@ -172,7 +190,7 @@
         },
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         stop : function () {
             this.provider.setTime(0);
@@ -181,7 +199,7 @@
         }, 
         /**
          * 
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         load : function () {
             this.provider.load();
@@ -189,7 +207,7 @@
         },
         /**
          * @param {Boolean} muted
-         * @returns {MediaPlayer}
+         * @returns {MediaProvider}
          */
         setMuted : function (muted) {
             return this.provider.setMuted(muted);
@@ -198,43 +216,62 @@
         /**
 		*
 		*@param {Number} value
-		*@return {MediaPlayer}
+		*@return {MediaProvider}
 		*/
 		setVolume : function  (value) {
 			this.provider.setVolume(value);
 			return this;
-		}
+		},
+        /**
+         * 
+         * @param {Mixed} event
+         * @param {Function} func
+         * @return {MediaProvider}
+         */
+        on : function (event, func) {
+            this.provider.on(event,func.bind(this));
+            return this;
+        },
+        /**
+         * 
+         * @return {MediaProvider}
+         */
+        destroy : function () {
+            this.provider.destroy();
+            return this;
+        }
     };
     
-    MediaPlayer.constants = {
+    MediaProvider.constants = {
         HTML5 : 1,
         AUDIO : 2,
         VIDEO : 3,
         FLASH : 4
     };
     
-	MediaPlayer.defaultOptions = {
-		type : MediaPlayer.constants.AUDIO,
-		use : MediaPlayer.constants.HTML5,
+	MediaProvider.defaultOptions = {
+		type : MediaProvider.constants.AUDIO,
+		use : MediaProvider.constants.HTML5,
         loop : false,
         autoplay : false,
         preload : false,
         autobuffer : false,
         volume : 100,
         controls : false,
-        source : []
+        source : [],
+        onCreate : t.emptyFunc
 	};
     
    
     
-    MediaPlayer.supportAudioHTML5 = function supportAudioHTML5() {
+    MediaProvider.supportAudioHTML5 = function supportAudioHTML5() {
         return (!window.HTMLAudioElement) ? false : true;
     };
     
-    MediaPlayer.supportVideoHTML5 = function supportVideoHTML5 () {
+    MediaProvider.supportVideoHTML5 = function supportVideoHTML5 () {
         return (!window.HTMLVideoElement) ? false : true;
     };
     
-    window.MP = MediaPlayer;
+    window.MP = MediaProvider ;
 	 
 })(window);
